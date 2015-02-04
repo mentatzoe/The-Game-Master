@@ -1,5 +1,6 @@
 from pyramid.view import view_config
 import logging
+import json
 
 log = logging.getLogger(__name__)
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
@@ -17,4 +18,4 @@ def idk(request):
     log.info("Something else")
     log.info(request.matchdict)
     yet_another_test = int(request.matchdict['foo2']) * 3
-    return {'foo': yet_another_test}
+    return {'foo': json.dumps({'foo': yet_another_test})}

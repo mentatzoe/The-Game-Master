@@ -1,0 +1,5 @@
+      [paste.app_factory]
+      main = gamemaster:main
+      [console_scripts]
+      initialize_gamemaster_db = gamemaster.scripts.initializedb:main
+      
