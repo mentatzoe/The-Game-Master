@@ -3,6 +3,7 @@ import generation as g
 import logging
 import operator
 import math 
+import sys
 
 log = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class Character:
         self.social_need = int((self.attributes['cha'] * r.random() * 100)%100)
         self.social_vector = []
         self.location = None
+        self.married = None
 
     def __str__(self):
         return str(self.__dict__)
@@ -60,9 +62,42 @@ class Character:
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def fillSocialVector(self, characters):
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def fill_social_vector(self, characters):
         #Filling social vector according to who other characters are
+        #"Affinity" is decreasing, as we want to use a value that reflects how alike characters are
         log.info("Filling social Vector")
+        self.social_vector = [self.calculate_affinity(char) for char in characters]
+        
+    def calculate_affinity(self, character):
+        affinity = 0
+        if self == character:
+            return 'x'
+        if self.location is not character.location:
+            affinity = sys.maxint
+        else:
+            for attr in self.attributes:
+                affinity += abs(self.attributes[attr] - character.attributes[attr])
+            for trait in self.personality:
+                affinity += abs(self.personality[trait] - character.personality[trait])
+            if not self.profession == character.profession:
+                affinity += 100
+            affinity += abs(self.age - character.age)
+            affinity += int(r.random() * 10) * r.choice([-1, 1])
+            if self.is_greedy():
+                if character.resources > self.resources:
+                    affinity -= int(r.random() * 10)
+        return affinity
+
 
     def set_location(self, location):
         self.location = location
+
+    def is_greedy(self):
+        return self.personality['greedy'] > 50
+    def is_romantic(self):
+        return self.personality['romantic'] > 50
+    def is_violent(self):
+        return self.personality['violent'] > 50

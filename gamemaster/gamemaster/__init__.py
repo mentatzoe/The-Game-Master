@@ -6,10 +6,16 @@ from .models import (
     Base,
     )
 
+from pyramid.session import SignedCookieSessionFactory
+
+
+from pyramid.config import Configurator
+
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
+    my_session_factory = SignedCookieSessionFactory('idontreallyneedthistobesupersecret')
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
@@ -19,5 +25,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('generate', '/generate')
     config.add_route('generate_with_number', '/generate/{number_of_characters}')
+    config.set_session_factory(my_session_factory)
     config.scan()
+    
     return config.make_wsgi_app()

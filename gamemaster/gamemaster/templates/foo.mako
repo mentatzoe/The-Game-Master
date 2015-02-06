@@ -25,13 +25,13 @@
         th {
             padding: 10px;
         }
-        tr {padding: 10 px;}
+        tr {padding: 10 px 20px;}
     </style>
   </head>
 
   <body>
     ${error}
-    <table style="padding: 10px">
+    <table style="width: 100%">
             <tr>
                     <th>Name</th>
                     <th>Age</th>
@@ -42,6 +42,8 @@
                     <th>Resources</th>
                     <th>Health</th>
                     <th>Social need</th>
+                    <th>Greedy</th>
+                    <th>Favorite person</th>
             </tr>
     % for f in foo:
             <tr>
@@ -54,14 +56,18 @@
                 <td>${f.resources}</td>
                 <td>${f.health}</td>
                 <td>${f.social_need}</td>
+                <td>${f.is_greedy()}</td>
+                <td>${foo[f.social_vector.index(min(f.social_vector))].name}
             </tr>
     % endfor 
     </table>
 
+    <h4>Locations</h4>
     %for b in bar:
-        ${b.name} - ${b.ocupation}
+        ${b.name} - ${b.ocupation}<br/>
     %endfor
 
+    
 <!-- Bootstrap core JavaScript
     ================================================== -->
 

@@ -72,5 +72,5 @@ last_names = ['Portlet', 'Stanford', 'Phiser', 'Sine',
              'Snowblade', 'Draven', 'Oswyn', 'Lopez', 'Perez',
              'Gomez', 'Zhang', 'Istair', 'Keogh', 'Crawford',
              'Gamble', 'Roman', 'Schwartz', 'Mckay', 'Franch',
-             'Sakurano', 'Suzuki', 'Ryuu', 'Kawasaki']
+             'Sakurano', 'Suzuki', 'Ryuu', 'Kawasaki', 'Dodas']
 

@@ -14,8 +14,10 @@ import generation as g
 import random as r
 import json
 import logging
+import pickle
 
 log = logging.getLogger(__name__)
+
 
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
 def my_view(request):
@@ -45,6 +47,7 @@ try it again.
 @view_config(route_name='generate', renderer='templates/foo.mako')
 @view_config(route_name='generate_with_number', renderer='templates/foo.mako')
 def generate(request):
+    session = request.session
     locations = l.generate()
     characters = []
     char_num = int(request.matchdict['number_of_characters'])
@@ -65,9 +68,7 @@ def generate(request):
     
     #then we calculate their relationships
     for char in characters:
-        log.info(char)
-        for char2 in characters:
-            #__eq__ test
-            log.info(char == char2)
-
+        char.fill_social_vector(characters)
+        log.info(char.social_vector)
+    #session['chars'] = characters
     return {'foo' : characters, 'bar': locations, 'error' : error_msg }
