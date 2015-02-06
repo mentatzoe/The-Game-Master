@@ -18,6 +18,11 @@ class Character:
             'int' : r.randint(3, 18),
             'cha' : r.randint(3, 18)
         }
+        self.personality = {
+            'greedy' : int(r.random() * 100),
+            'violent' : int(r.random() * 100),
+            'romantic' : int(r.random() * 100),
+        }
         possible_professions = g.professions[max(self.attributes.iteritems(), key=operator.itemgetter(1))[0]]
         self.profession = possible_professions[r.randint(0, len(possible_professions)-1)]
         self.resources = int(math.floor(g.profession_pays[self.profession] * (r.randint(18, self.age) * 12 * self.attributes['int'] * r.random())))
@@ -30,25 +35,27 @@ class Character:
         self.location = None
 
     def __str__(self):
-        return """ 
-        Character Name: %s,
-        Age: %d,
-        Gender: %s,
-        Attributes:
-        STR %d 
-        CON %d
-        DEX %d
-        INT %d
-        CHA %d,
-        Profession: %s
-        Resources: %d 
-        Health: %d 
-        Starting happiness: %d
-        Starting social need: %d
-        """%(self.name, self.age, self.gender, self.attributes['str'], 
-            self.attributes['con'], self.attributes['dex'], self.attributes['int'], 
-            self.attributes['cha'], self.profession, self.resources,
-            self.health, self.happiness, self.social_need)
+        return str(self.__dict__)
+        #KISS
+        # return """ 
+        # Character Name: %s,
+        # Age: %d,
+        # Gender: %s,
+        # Attributes:
+        # STR %d 
+        # CON %d
+        # DEX %d
+        # INT %d
+        # CHA %d,
+        # Profession: %s
+        # Resources: %d 
+        # Health: %d 
+        # Starting happiness: %d
+        # Starting social need: %d
+        # """%(self.name, self.age, self.gender, self.attributes['str'], 
+        #     self.attributes['con'], self.attributes['dex'], self.attributes['int'], 
+        #     self.attributes['cha'], self.profession, self.resources,
+        #     self.health, self.happiness, self.social_need)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

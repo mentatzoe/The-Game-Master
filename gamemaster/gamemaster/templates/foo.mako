@@ -21,11 +21,17 @@
       <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
       <script src="//oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
+    <style>
+        th {
+            padding: 10px;
+        }
+        tr {padding: 10 px;}
+    </style>
   </head>
 
   <body>
     ${error}
-    <table>
+    <table style="padding: 10px">
             <tr>
                     <th>Name</th>
                     <th>Age</th>

@@ -46,19 +46,16 @@ try it again.
 @view_config(route_name='generate_with_number', renderer='templates/foo.mako')
 def generate(request):
     locations = l.generate()
-    log.info(locations)
     characters = []
-
+    char_num = int(request.matchdict['number_of_characters'])
     #we generate all characters first
-    for char_ind in range(int(request.matchdict['number_of_characters'])):
+    for char_ind in range(char_num):
         c = Character()
         full_locs = []
         error_msg = ''
         possible_locations = [i for i in range(len(locations)) if not locations[i].is_full() and locations[i].can_work(c)]
-        log.info(possible_locations)
-        log.info(len(possible_locations))
-        if len(possible_locations) == 0:
-            error_msg = "Not enough available locations. " + str(char_ind) + " characters weren't generated"
+        if len(possible_locations) == 0: #consider generating a new character
+            error_msg = "Not enough available locations. " + str(char_num - char_ind) + " characters weren't generated."
             break
         else:
             loc = locations[possible_locations[r.randint(0, len(possible_locations)-1)]]
@@ -67,10 +64,10 @@ def generate(request):
         characters.append(c)
     
     #then we calculate their relationships
-    for char1 in characters:
-        log.info(char1.name)
+    for char in characters:
+        log.info(char)
         for char2 in characters:
-            log.info(char1 == char2)
-
+            #__eq__ test
+            log.info(char == char2)
 
     return {'foo' : characters, 'bar': locations, 'error' : error_msg }
