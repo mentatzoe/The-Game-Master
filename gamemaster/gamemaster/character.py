@@ -101,3 +101,12 @@ class Character:
         return self.personality['romantic'] > 50
     def is_violent(self):
         return self.personality['violent'] > 50
+
+    def do_action(self, action, **kwargs):
+        if action not in self.actions:
+            return None
+        self.actions[action]()
+
+    def get_attribute(self, attr):
+        return self.attr
+
