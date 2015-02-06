@@ -8,6 +8,14 @@ from .models import (
     MyModel,
     )
 
+from character import Character
+import locations as l
+import generation as g
+import random as r
+import json
+import logging
+
+log = logging.getLogger(__name__)
 
 @view_config(route_name='home', renderer='templates/mytemplate.pt')
 def my_view(request):
@@ -34,3 +42,35 @@ After you fix the problem, please restart the Pyramid application to
 try it again.
 """
 
+@view_config(route_name='generate', renderer='templates/foo.mako')
+@view_config(route_name='generate_with_number', renderer='templates/foo.mako')
+def generate(request):
+    locations = l.generate()
+    log.info(locations)
+    characters = []
+
+    #we generate all characters first
+    for char_ind in range(int(request.matchdict['number_of_characters'])):
+        c = Character()
+        full_locs = []
+        error_msg = ''
+        possible_locations = [i for i in range(len(locations)) if not locations[i].is_full() and locations[i].can_work(c)]
+        log.info(possible_locations)
+        log.info(len(possible_locations))
+        if len(possible_locations) == 0:
+            error_msg = "Not enough available locations. " + str(char_ind) + " characters weren't generated"
+            break
+        else:
+            loc = locations[possible_locations[r.randint(0, len(possible_locations)-1)]]
+            c.set_location(loc)
+            loc.increase_ocupation()
+        characters.append(c)
+    
+    #then we calculate their relationships
+    for char1 in characters:
+        log.info(char1.name)
+        for char2 in characters:
+            log.info(char1 == char2)
+
+
+    return {'foo' : characters, 'bar': locations, 'error' : error_msg }

@@ -21,4 +21,5 @@ gamemaster/static/pyramid-16x16.png
 gamemaster/static/pyramid.png
 gamemaster/static/theme.css
 gamemaster/static/theme.min.css
+gamemaster/templates/foo.pt
 gamemaster/templates/mytemplate.pt
