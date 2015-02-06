@@ -9,6 +9,7 @@ from .models import (
     )
 
 from character import Character
+import rules
 import locations as l
 import generation as g
 import random as r
@@ -71,4 +72,21 @@ def generate(request):
         char.fill_social_vector(characters)
         log.info(char.social_vector)
     #session['chars'] = characters
+    model = MyModel()
+    model.name = 'characters' + str(r.random() * 100)
+    model.value = str(pickle.dumps(characters))
+    db_characters = DBSession.add(model)
+    log.info(db_characters)
+    session['chars'] = model.name
     return {'foo' : characters, 'bar': locations, 'error' : error_msg }
+
+@view_config(route_name='generate_story', renderer='templates/foo2.mako')
+def generate_story(request):
+    session = request.session
+    log.info(session)
+    error_msg = ''
+    characters_pre = DBSession.query(MyModel).filter(MyModel.name == session['chars']).one()
+    characters = pickle.loads(characters_pre.value)
+    for char in characters:
+        log.info(char.name)
+    return {'foo' : ['a', 'b'], 'bar': [''], 'error' : error_msg }

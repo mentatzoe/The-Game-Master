@@ -25,6 +25,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('generate', '/generate')
     config.add_route('generate_with_number', '/generate/{number_of_characters}')
+    config.add_route('generate_story', '/story')
     config.set_session_factory(my_session_factory)
     config.scan()
     

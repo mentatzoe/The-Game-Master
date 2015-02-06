@@ -31,43 +31,13 @@
 
   <body>
     ${error}
-    <table style="width: 100%">
-            <tr>
-                    <th>Name</th>
-                    <th>Age</th>
-                    <th>Gender</th>
-                    <th>Location</th>
-                    <th>Profession</th>
-                    <th>Happiness</th>
-                    <th>Resources</th>
-                    <th>Health</th>
-                    <th>Social need</th>
-                    <th>Greedy</th>
-                    <th>Favorite person</th>
-            </tr>
-    % for f in foo:
-            <tr>
-                <td>${f.name}</td>
-                <td>${f.age}</td>
-                <td>${f.gender}</td>
-                <td>${f.location.name}</td>
-                <td>${f.profession}</td>
-                <td>${f.happiness}</td>
-                <td>${f.resources}</td>
-                <td>${f.health}</td>
-                <td>${f.social_need}</td>
-                <td>${f.is_greedy()}</td>
-                <td>${foo[f.social_vector.index(min(f.social_vector))].name}
-            </tr>
-    % endfor 
-    </table>
+    ${foo}
+    ${bar}
 
-    <h4>Locations</h4>
-    %for b in bar:
-        ${b.name} - ${b.ocupation}<br/>
-    %endfor
 
-    <a href="/story"> CONTINUE GENERATING STORY </a>
+
+
+    
 <!-- Bootstrap core JavaScript
     ================================================== -->
 
