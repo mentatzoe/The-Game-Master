@@ -9,7 +9,7 @@ from .models import (
     )
 
 from character import Character
-import rules
+import rules as ru
 import locations as l
 import generation as g
 import random as r
@@ -71,6 +71,17 @@ def generate(request):
     for char in characters:
         char.fill_social_vector(characters)
         log.info(char.social_vector)
+        if characters[char.social_vector.index(min(char.social_vector))].location == char.location:
+            char.friend_in_location_atr = True
+        if characters[char.social_vector.index(max(char.social_vector))].location == char.location:
+            log.info("Enemy is "+characters[char.social_vector.index(max(char.social_vector))].name)
+            char.enemy_in_location_atr = True
+        if char.profession in char.location.actions['work']:
+            char.can_work_atr = True
+        characters_in_loc = [c for c in characters if c.location == char.location and c.profession == 'doctor']
+        if len(characters_in_loc) > 0:
+            doctor_available_atr = True
+        #Calculate can_work, doctor_available, friend/enemy_in_location
     #session['chars'] = characters
     model = MyModel()
     model.name = 'characters' + str(r.random() * 100)
@@ -87,6 +98,13 @@ def generate_story(request):
     error_msg = ''
     characters_pre = DBSession.query(MyModel).filter(MyModel.name == session['chars']).one()
     characters = pickle.loads(characters_pre.value)
-    for char in characters:
-        log.info(char.name)
+    rules = ru.render_rules()
+    for i in range(5):
+        for season in ['summer', 'fall', 'winter', 'spring']:
+            log.info(season + ' of year ' + str(i) +": ")
+            for char in characters:
+                for rule in rules:
+                    if rule.matches(char):
+                        log.info(char.name + " " + rule.action)
+                        break
     return {'foo' : ['a', 'b'], 'bar': [''], 'error' : error_msg }

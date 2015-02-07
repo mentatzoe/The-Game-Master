@@ -35,7 +35,23 @@ class Character:
         self.social_vector = []
         self.location = None
         self.married = None
+        self.sick_atr = False
+        self.doctor_available_atr = False
+        self.can_work_atr = True
+        self.friend_in_location_atr = False
+        self.enemy_in_location_atr = False
 
+    def sick(self):
+        return self.sick_atr
+    def doctor_available(self):
+        return self.doctor_available_atr
+    def can_work(self):
+        return self.can_work_atr
+    def friend_in_location(self):
+        return self.friend_in_location_atr
+    def enemy_in_location(self):
+        return self.enemy_in_location_atr
+        
     def __str__(self):
         return str(self.__dict__)
         #KISS
@@ -76,19 +92,18 @@ class Character:
         if self == character:
             return 'x'
         if self.location is not character.location:
-            affinity = sys.maxint
-        else:
-            for attr in self.attributes:
-                affinity += abs(self.attributes[attr] - character.attributes[attr])
-            for trait in self.personality:
-                affinity += abs(self.personality[trait] - character.personality[trait])
-            if not self.profession == character.profession:
-                affinity += 100
-            affinity += abs(self.age - character.age)
-            affinity += int(r.random() * 10) * r.choice([-1, 1])
-            if self.is_greedy():
-                if character.resources > self.resources:
-                    affinity -= int(r.random() * 10)
+            affinity += int(3000 * r.random())
+        for attr in self.attributes:
+            affinity += abs(self.attributes[attr] - character.attributes[attr])
+        for trait in self.personality:
+            affinity += abs(self.personality[trait] - character.personality[trait])
+        if not self.profession == character.profession:
+            affinity += 100
+        affinity += abs(self.age - character.age)
+        affinity += int(r.random() * 10) * r.choice([-1, 1])
+        if self.is_greedy():
+            if character.resources > self.resources:
+                affinity -= int(r.random() * 10)
         return affinity
 
 
@@ -110,3 +125,58 @@ class Character:
     def get_attribute(self, attr):
         return self.attr
 
+    def update_booleans(self, other):
+        if characters[char.social_vector.index(min(char.social_vector))].location == self.location:
+            char.friend_in_location_atr = True
+        if characters[char.social_vector.index(max(char.social_vector))].location == self.location:
+            log.info("Enemy is "+characters[char.social_vector.index(max(char.social_vector))].name)
+            char.enemy_in_location_atr = True
+        if char.profession in char.location.actions['work']:
+            char.can_work_atr = True
+        characters_in_loc = [c for c in characters if c.location == char.location and c.profession == 'doctor']
+        if len(characters_in_loc) > 0:
+            doctor_available_atr = True
+
+    def update_health(self):
+        if self.sick:
+            self.health -= 10
+        else:
+            self.health -= 2
+
+    def update_happiness(self, factor):
+        if (factor * 100)%100 > 50:
+            self.happiness += factor
+            self.happiness %= 100
+        else:
+            self.happiness -= factor
+            if self.happiness < 0:
+                self.happiness = 0
+
+    def work(self, **kwargs):
+        log.info(self.name + " worked")
+        luck = int(r.random() * max(self.attributes.iteritems(), key=operator.itemgetter(1))[1])
+        self.resources += int(math.floor(g.profession_pays[self.profession] * (luck)))
+        self.update_happiness(luck)
+
+    def 
+
+    def travel(self, free = False, **kwargs):
+        log.info("Foo")
+
+    def die(self):
+        log.info("Foo")
+
+    def play(self, other = None, **kwargs):
+        log.info("Foo")
+
+    def love(self, other = None, **kwargs):
+        log.info("Foo")
+
+    def argue(self, other = None, **kwargs):
+        log.info("Foo")
+
+    def fight(self, other = None, **kwargs):
+        log.info("Foo")
+
+    def steal(self, other = None, **kwargs):
+        log.info("Foo")
