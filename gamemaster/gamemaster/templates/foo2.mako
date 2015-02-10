@@ -32,8 +32,9 @@
   <body>
     ${error}
     ${foo}
-    ${bar}
-
+    %for b in bar:
+    ${b}<br/>
+    %endfor
 
 
 
