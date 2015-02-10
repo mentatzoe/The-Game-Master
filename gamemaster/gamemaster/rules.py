@@ -29,8 +29,8 @@ class Rule:
             match = match and clause.matches(character)
         return match
 
-    def do_action(character):
-        character.do_action(self.action)
+    def do_action(self, character, character_list):
+        return character.do_action(self.action, character_list)
 
 class Clause:
     def __init__(self, identifier, values, clause_type):
