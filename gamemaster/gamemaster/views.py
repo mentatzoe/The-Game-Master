@@ -64,6 +64,7 @@ def generate(request):
         else:
             loc = locations[possible_locations[r.randint(0, len(possible_locations)-1)]]
             c.set_location(loc)
+            loc.inhabitants.append(c)
             loc.increase_ocupation()
         characters.append(c)
     
@@ -72,6 +73,7 @@ def generate(request):
         char.fill_social_vector(characters)
         log.info(char.social_vector)
         if characters[char.social_vector.index(min(char.social_vector))].location == char.location:
+            log.info("Friend is" +characters[char.social_vector.index(min(char.social_vector))].name)
             char.friend_in_location_atr = True
         if characters[char.social_vector.index(max(char.social_vector))].location == char.location:
             log.info("Enemy is "+characters[char.social_vector.index(max(char.social_vector))].name)
@@ -80,14 +82,13 @@ def generate(request):
             char.can_work_atr = True
         characters_in_loc = [c for c in characters if c.location == char.location and c.profession == 'doctor']
         if len(characters_in_loc) > 0:
-            doctor_available_atr = True
+            char.doctor_available_atr = True
         #Calculate can_work, doctor_available, friend/enemy_in_location
     #session['chars'] = characters
     model = MyModel()
     model.name = 'characters' + str(r.random() * 100)
     model.value = str(pickle.dumps(characters))
     db_characters = DBSession.add(model)
-    log.info(db_characters)
     session['chars'] = model.name
     return {'foo' : characters, 'bar': locations, 'error' : error_msg }
 
@@ -95,16 +96,26 @@ def generate(request):
 def generate_story(request):
     session = request.session
     log.info(session)
+    happenings = []
     error_msg = ''
     characters_pre = DBSession.query(MyModel).filter(MyModel.name == session['chars']).one()
     characters = pickle.loads(characters_pre.value)
     rules = ru.render_rules()
+    acted = False
     for i in range(5):
-        for season in ['summer', 'fall', 'winter', 'spring']:
-            log.info(season + ' of year ' + str(i) +": ")
+        for season in ['Summer', 'Fall', 'Winter', 'Spring']:
             for char in characters:
+                acted = False
                 for rule in rules:
                     if rule.matches(char):
-                        log.info(char.name + " " + rule.action)
+                        happenings.append(season + " of Year " + str(i) + ": " + rule.do_action(char, characters) + " " + str(char.happiness))
+                        char.update_booleans(characters)
+                        char.update_health()
+                        acted = True
                         break
-    return {'foo' : ['a', 'b'], 'bar': [''], 'error' : error_msg }
+                if not acted:
+                    happenings.append(season + " of Year " + str(i) + ": " + char.name + " didn't do anything relevant.")
+                    char.update_booleans(characters)
+                    char.update_health()
+        happenings.append("________________________________")
+    return {'foo' : ['a', 'b'], 'bar': happenings, 'error' : error_msg }
