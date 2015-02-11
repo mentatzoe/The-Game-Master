@@ -5,7 +5,7 @@ Info that we need: Name, Trip price, Work actions, Capacity, Ocupation, Connecti
 '''
 
 class Location:
-    def __init__(self, id, name, workactions, playactions, capacity):
+    def __init__(self, id, name, workactions, playactions, capacity, price):
         self.id = id
         self.name = name
         self.actions = {
@@ -16,6 +16,7 @@ class Location:
         self.ocupation = 0
         self.connections = {}
         self.inhabitants = []
+        self.price = price
 
     def __str__(self):
         return str(self.__dict__)
@@ -41,9 +42,9 @@ class Location:
 
 def generate():
     location_list = []
-    spaceship = Location(0, 'Horizon RK7', ['military', 'doctor', 'builder'], [('chess', 'int', 2), ('virtual sports', 'dex', 3)], 5)
-    city = Location(1, 'Sydney Archology', ['police', 'scholar', 'doctor', 'artist', 'salesman', 'politician'], [('chess', 'int', 2), ('virtual sports', 'dex', 7), ('study', 'int', 1)], 12)
-    colony = Location(2, 'Luthien Prime Colony', ['military', 'police', 'doctor', 'builder', 'salesman', 'politician'], [('chess', 'int', 2), ('virtual sports', 'dex', 5)], 7) 
+    spaceship = Location(0, 'Horizon RK7', ['military', 'doctor', 'builder'], [('chess', 'int', 2), ('virtual sports', 'dex', 3)], 5, 3000)
+    city = Location(1, 'Sydney Archology', ['police', 'scholar', 'doctor', 'artist', 'salesman', 'politician'], [('chess', 'int', 2), ('virtual sports', 'dex', 7), ('study', 'int', 1)], 12, 2000)
+    colony = Location(2, 'Luthien Prime Colony', ['military', 'police', 'doctor', 'builder', 'salesman', 'politician'], [('chess', 'int', 2), ('virtual sports', 'dex', 5)], 7, 3500) 
     
     spaceship.set_connections({spaceship.id: 0, city.id: city, colony.id: colony})
     city.set_connections({spaceship.id: spaceship, city.id: 0, colony.id: colony})

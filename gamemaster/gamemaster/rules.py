@@ -21,7 +21,10 @@ class Rule:
     def __init__(self, clauses, action):
         self.clause_list = clauses
         self.action = action
-        self.match = False
+
+    def __str__(self):
+        string = [clause.id for clause in self.clause_list]
+        return str(self.__dict__) + str(string)
 
     def matches(self, character):
         match = self.clause_list[0].matches(character)
@@ -162,23 +165,31 @@ def render_rules():
     r6 = Rule([sick, not_doctor_available, not_can_change_location, can_work],'work')
     r7 = Rule([sick, not_doctor_available, not_can_change_location, not_can_work],'travel_free')
     r8 = Rule([not_sick, social, mood_ok, friend_in_location, loving],'love')
-    r9 = Rule([not_sick, social, mood_ok, friend_in_location, not_loving],'play')
+    r9 = Rule([not_sick, social, mood_ok, friend_in_location],'play')
     r10 = Rule([not_sick, social, mood_ok, not_friend_in_location, can_change_location],'travel_friend')
     r11 = Rule([not_sick, social, mood_ok, not_friend_in_location, not_can_change_location, can_work],'work')
     r12 = Rule([not_sick, social, mood_ok, not_friend_in_location, not_can_change_location, not_can_work],'travel_friend_free')
     r13 = Rule([not_sick, social, not_mood_ok, enemy_in_location, greedy, violent], 'fight')
     r14 = Rule([not_sick, social, not_mood_ok, enemy_in_location, greedy, not_violent],'steal')
-    r15 = Rule([not_sick, social, not_mood_ok, enemy_in_location, not_greedy, not_violent],'argue')
+    r15 = Rule([not_sick, social, not_mood_ok, enemy_in_location],'argue')
     r16 = Rule([not_sick, social, not_mood_ok, not_enemy_in_location, can_change_location],'travel_enemy')
     r17 = Rule([not_sick, social, not_mood_ok, not_enemy_in_location, not_can_change_location, can_work],'work')
     r18 = Rule([not_sick, social, not_mood_ok, not_enemy_in_location, not_can_change_location, not_can_work],'travel_enemy_free')
-    r19 = Rule([not_sick, not_social, greedy, violent, not_loving], 'steal')
-    r20 = Rule([not_sick, mood_ok, greedy, not_violent, not_loving], 'work')
-    r21 = Rule([not_sick, not_mood_ok, not_greedy, not_violent, loving], 'argue')
-    r22 = Rule([not_sick, awful_mood, not_greedy, not_violent, not_loving], 'suicide')
+    
+    r19 = Rule([not_sick, mood_ok, not_social, greedy, violent], 'steal')
+    r20 = Rule([not_sick, mood_ok, not_social, greedy, not_violent], 'work')
+
+    r21 = Rule([not_sick, not_mood_ok, not_social, greedy, violent], 'steal')
+    r22 = Rule([not_sick, not_mood_ok, not_social, greedy, not_violent], 'work')
+
+    r23 = Rule([not_sick, awful_mood, not_greedy, not_violent, not_loving], 'suicide')
+
+    r24 = Rule([not_sick, not_social], 'play')
+
+    
 
     rule_list = [r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, 
-    r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22]
+    r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24]
 
     return rule_list
     log.info("Aloha")

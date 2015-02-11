@@ -55,6 +55,7 @@ def generate(request):
     #we generate all characters first
     for char_ind in range(char_num):
         c = Character()
+        c.id = char_ind
         full_locs = []
         error_msg = ''
         possible_locations = [i for i in range(len(locations)) if not locations[i].is_full() and locations[i].can_work(c)]
@@ -72,17 +73,7 @@ def generate(request):
     for char in characters:
         char.fill_social_vector(characters)
         log.info(char.social_vector)
-        if characters[char.social_vector.index(min(char.social_vector))].location == char.location:
-            log.info("Friend is" +characters[char.social_vector.index(min(char.social_vector))].name)
-            char.friend_in_location_atr = True
-        if characters[char.social_vector.index(max(char.social_vector))].location == char.location:
-            log.info("Enemy is "+characters[char.social_vector.index(max(char.social_vector))].name)
-            char.enemy_in_location_atr = True
-        if char.profession in char.location.actions['work']:
-            char.can_work_atr = True
-        characters_in_loc = [c for c in characters if c.location == char.location and c.profession == 'doctor']
-        if len(characters_in_loc) > 0:
-            char.doctor_available_atr = True
+        char.update_booleans(characters)
         #Calculate can_work, doctor_available, friend/enemy_in_location
     #session['chars'] = characters
     model = MyModel()
@@ -108,14 +99,22 @@ def generate_story(request):
                 acted = False
                 for rule in rules:
                     if rule.matches(char):
+                        if char.sick():
+                            log.info(str(i) + season + char.name + " Character is sick")
                         happenings.append(season + " of Year " + str(i) + ": " + rule.do_action(char, characters) + " " + str(char.happiness))
                         char.update_booleans(characters)
                         char.update_health()
                         acted = True
+                        log.info("RULE TRIGGERED " + str(rule))
                         break
                 if not acted:
-                    happenings.append(season + " of Year " + str(i) + ": " + char.name + " didn't do anything relevant.")
+                    log.info(char.name + "DIDNT ACT -----")
+                    log.info("# rules " + str(len(rules)))
+                    log.info(rules[23].matches(char))
+                    char.log_booleans()
                     char.update_booleans(characters)
                     char.update_health()
+                    log.info("_______________________________")
+            happenings.append("________________________________")
         happenings.append("________________________________")
     return {'foo' : ['a', 'b'], 'bar': happenings, 'error' : error_msg }

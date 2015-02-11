@@ -57,7 +57,7 @@
                 <td>${f.health}</td>
                 <td>${f.social_need}</td>
                 <td>${f.is_greedy()}</td>
-                <td>${foo[f.social_vector.index(min(f.social_vector))].name}
+                <td>${ " sfsdf"}
             </tr>
     % endfor 
     </table>
