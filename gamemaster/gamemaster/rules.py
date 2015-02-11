@@ -176,7 +176,7 @@ def render_rules():
     r17 = Rule([not_sick, social, not_mood_ok, not_enemy_in_location, not_can_change_location, can_work],'work')
     r18 = Rule([not_sick, social, not_mood_ok, not_enemy_in_location, not_can_change_location, not_can_work],'travel_enemy_free')
     
-    r19 = Rule([not_sick, mood_ok, not_social, greedy, violent], 'steal')
+    r19 = Rule([not_sick, mood_ok, not_social, greedy, violent], 'play')
     r20 = Rule([not_sick, mood_ok, not_social, greedy, not_violent], 'work')
 
     r21 = Rule([not_sick, not_mood_ok, not_social, greedy, violent], 'steal')
@@ -184,7 +184,7 @@ def render_rules():
 
     r23 = Rule([not_sick, awful_mood, not_greedy, not_violent, not_loving], 'suicide')
 
-    r24 = Rule([not_sick, not_social], 'play')
+    r24 = Rule([not_sick, not_social], 'play_alone')
 
     
 

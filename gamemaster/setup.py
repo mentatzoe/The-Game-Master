@@ -16,7 +16,9 @@ requires = [
     'SQLAlchemy',
     'transaction',
     'zope.sqlalchemy',
+    'PIL',
     'waitress',
+    'pillow'
     ]
 
 setup(name='gamemaster',

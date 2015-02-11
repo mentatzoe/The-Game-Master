@@ -26,6 +26,7 @@ def main(global_config, **settings):
     config.add_route('generate', '/generate')
     config.add_route('generate_with_number', '/generate/{number_of_characters}')
     config.add_route('generate_story', '/story')
+    config.add_static_view(name='/images/', path=config.registry.settings['img_dir'])
     config.set_session_factory(my_session_factory)
     config.scan()
     

@@ -4,6 +4,8 @@ import logging
 import operator
 import math 
 import sys
+import Image
+import os
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +43,7 @@ class Character:
         self.can_work_atr = True
         self.friend_in_location_atr = False
         self.enemy_in_location_atr = False
+        self.generate_picture()
 
     def sick(self):
         return self.sick_atr
@@ -62,12 +65,38 @@ class Character:
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def generate_picture(self):
+        log.info("Generating picture")
+        dirname = os.path.dirname(os.path.realpath(__file__))
+        if self.gender == 'male':
+            faces = 10
+            hairs = 5
+            outfits = 3
+            route = dirname + "/static/images/male/"
+        else:
+            faces = 10
+            hairs = 2
+            outfits = 2
+            route = dirname + "/static/images/female/"
+        background = Image.open(route + "base.png")
+        face_number = r.randint(1, faces)
+        face = Image.open(route + "face" + str(face_number) +".png")
+        background.paste(face, (0,0), face)
+        hair_number = r.randint(1, hairs)
+        outfit_number = r.randint(1, outfits)
+        outfit = Image.open(route + "outfit" + str(outfit_number) +".png")
+        hair = Image.open(route + "hair" + str(hair_number) +".png")
+        background.paste(hair, (0,0), hair)
+        background.paste(outfit, (0,0), outfit)
+        self.picture = "/static/images/characters/" + str(r.random()) + "_" + self.name + ".png"
+        background.save(dirname + self.picture)
+        
 
     def fill_social_vector(self, characters):
         #Filling social vector according to who other characters are
         #"Affinity" is decreasing, as we want to use a value that reflects how alike characters are
         log.info("Filling social Vector")
-        self.social_vector = {char.id : self.calculate_affinity(char) for char in characters if char is not self}
+        self.social_vector = {characters[char].id : self.calculate_affinity(characters[char]) for char in characters if characters[char] is not self}
         
     def calculate_affinity(self, character):
         affinity = 0
@@ -99,6 +128,12 @@ class Character:
     def is_violent(self):
         return self.personality['violent'] > 50
 
+    def is_best_friend(self, other):
+        return other.id == min(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]
+
+    def is_enemy(self, other):
+        return other.id == max(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]
+
     def do_action(self, action, character_list, **kwargs):
         log.info("Action is " + action)
         actions = {
@@ -110,6 +145,7 @@ class Character:
             'travel_friend_free': self.travel,
             'travel_enemy_free': self.travel,
             'play': self.play,
+            'play_alone': self.play_alone,
             'love': self.love,
             'steal': self.steal,
             'fight': self.fight,
@@ -126,22 +162,17 @@ class Character:
         kwargs = {}
         words = action.split('_')[0]
 
-        if len(words) > 1 and words[0] == 'travel':
-            if len(words) > 2 and action.split('_')[1] == 'friend':
-                log.info(max(self.social_vector.iteritems(), key=operator.itemgetter(1))[0])
-                kwargs['friend'] = character_list[min(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]]
-            elif len(words) > 2 and action.split('_')[1] == 'enemy':
-                kwargs['enemy'] = character_list[max(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]]
-            elif len(words) > 2 and action.split('_')[1] == 'free':
-                kwargs['free'] = True
-            if len(words) > 3 and words[2] == 'free':
-                kwargs['free'] = True
+        if action in ['travel_free', 'travel_friend_free', 'travel_enemy_free']:
+            kwargs['free'] = True
 
-        if action in ['steal', 'fight', 'argue', 'travel_enemy']:
+        if action in ['steal', 'fight', 'argue', 'travel_enemy', 'travel_enemy_free']:
             kwargs['enemy'] = character_list[max(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]]
 
-        if action in ['die', 'suicide']:
-            kwargs['character_list'] = character_list
+        if action in ['love', 'travel_friend', 'travel_friend_free']:
+            kwargs['friend'] = character_list[min(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]]
+            log.info(kwargs['friend'].id)
+
+        kwargs['character_list'] = character_list
 
 
         return actions[action](**kwargs)
@@ -150,16 +181,20 @@ class Character:
         return self.attr
 
     def update_booleans(self, characters, other = None):
-        if characters[min(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]].location == self.location:
-            log.info("Friend is "+characters[min(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]].name)
+        friend = characters[min(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]]
+        enemy = characters[max(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]]
+
+        if friend.location == self.location:
             self.friend_in_location_atr = True
-        if characters[max(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]].location == self.location:
-            log.info("Enemy is "+characters[max(self.social_vector.iteritems(), key=operator.itemgetter(1))[0]].name)
+
+        if enemy.location == self.location:
             self.enemy_in_location_atr = True
+
         if self.profession in self.location.actions['work']:
             self.can_work_atr = True
-        characters_in_loc = [c for c in characters if c.location == self.location and c.profession == 'doctor']
-        if len(characters_in_loc) > 0:
+
+        doctors_in_loc = [characters[char] for char in characters if characters[char].location == self.location and characters[char].profession == 'doctor']
+        if len(doctors_in_loc) > 0:
             self.doctor_available_atr = True
 
     def log_booleans(self):
@@ -179,16 +214,13 @@ class Character:
         if self.sick:
             self.health -= 10
         else:
-            self.health -= 2
+            self.health -= 0.1
 
         if self.health <20:
-            log.info(r.random()*100 < 30)
             self.sick_atr = r.random()*100 < 3
 
 
     def update_happiness(self, factor):
-        log.info("luck " + str(int(r.random() * max(self.attributes.iteritems(), key=operator.itemgetter(1))[1] * 100)%100))
-        log.info("Happiness factor " + str(factor))
         if (factor * 100)%100 > 50:
             self.happiness += factor
             self.happiness %= 100
@@ -201,51 +233,55 @@ class Character:
         luck = int(r.random() * max(self.attributes.iteritems(), key=operator.itemgetter(1))[1])
         self.resources += int(math.floor(g.profession_pays[self.profession] * (luck)))
         self.update_happiness(luck)
+        self.social_need += 20
         return self.name + " worked."
 
     def travel(self, free = False, **kwargs):
         new_location = None
-
+        reason = ""
         if 'friend' in kwargs:
             new_location = kwargs['friend'].location
+            log.info("friend in travel " + str(kwargs['friend'])+ " " + kwargs['friend'].location.name)
+            reason = " searching for " + kwargs['friend'].name
         if 'enemy' in kwargs:
             new_location = kwargs['enemy'].location
+            reason = " searching for " + kwargs['enemy'].name
+            log.info("enemy in travel " + str(kwargs['enemy']) + " " + kwargs['enemy'].location.name)
         if 'work' in kwargs:
             new_location = kwargs['work']
-            log.info("Location here")
-
-        
 
         #Need to specify location
-        for id_num in range(len(self.location.connections)):
-            if self.location.connections[id_num] is not 0 and self.location.connections[id_num].can_work(self):
-                new_location = self.location.connections[id_num]
-                log.info("Location here")
         if new_location is None:
-            return self.name + " wanted to travel but couldn't."
+            for id_num in range(len(self.location.connections)):
+                if self.location.connections[id_num] is not 0 and self.location.connections[id_num].can_work(self):
+                    new_location = self.location.connections[id_num]
+            if new_location is None:
+                return self.name + " wanted to travel but couldn't."
 
         self.location.ocupation -= 1
         new_location.increase_ocupation()
         if 'free' not in kwargs or kwargs['free'] == False:
             price = self.location.connections[new_location.id].price
             self.resources -= price
+        old_location = self.location
         self.location.inhabitants.remove(self)
         self.location = new_location
         self.location.inhabitants.append(self)
-        return self.name + " went to " + self.location.name + "."
+        log.info(new_location.name + ": ")
+        for c in new_location.inhabitants:
+            log.info(c.name)
+        log.info(self in old_location.inhabitants)
+        for c in kwargs['character_list']:
+            kwargs['character_list'][c].update_booleans(kwargs['character_list'])
+
+        return self.name + " went to " + self.location.name + reason + "."
 
     def die(self, **kwargs):
-        if 'character_list' in kwargs:
-            log.info((len(kwargs['character_list'])))
-            kwargs['character_list'].remove(self)
-            log.info((len(kwargs['character_list'])))
-            for c in kwargs['character_list']:
-                c.fill_social_vector(kwargs['character_list'])
-            return self.name + " died."
-        else:
-            return "SOMETHING WENT WRONG"
+        return self.name + " died."
 
     def play(self, other = None, **kwargs):
+        if len(self.location.inhabitants) == 1:
+            return self.play_alone()
         game = self.location.actions['play'][r.randint(0, len(self.location.actions['play'])-1)]
         players = [self]
         if game[2] > 1:
@@ -256,9 +292,9 @@ class Character:
         scores = {p.name : r.random() * 10 * p.attributes[game_attribute] for p in players}
         winner = max(scores.iteritems(), key=operator.itemgetter(1))[0]
         if winner == self.name:
-            factor = (r.random()*self.personality['greedy'])
+            factor = int((r.random()*self.personality['greedy']) *10)
             log.info(factor)
-            self.happiness += 20 * factor
+            self.happiness += factor
             won = 'won.'
         else:
             won = "didn't win."
@@ -272,38 +308,193 @@ class Character:
                 playerList += player.name + ", "
         return self.name + " played " + game[0] + " with " + playerList + " and " + won
 
+
+    def play_alone(self, other = None, **kwargs):
+        game = self.location.actions['play_alone'][r.randint(0, len(self.location.actions['play'])-1)]
+        self.attributes[game[1]] += 1
+        previous = self.social_need
+        self.social_need += int(10 + previous * 0.1)
+        self.happiness += 10
+        return self.name + " " + game[0] + "."
+
     def love(self, other = None, **kwargs):
-        luck = int(r.random() * 10 * max(self.attributes.iteritems(), key=operator.itemgetter(1))[1])%100
-        self.update_happiness(luck)
-        return self.name + " loved."
+        other = kwargs['friend']
+        log.info(other)
+        if other.is_romantic():
+            if other.is_best_friend(self):
+                if not self.married and not other.married:
+                    self.social_vector[other.id] -= 30
+                    other.social_vector[self.id] -= 30
+                    self.married = True
+                    self.spouse = other
+                    other.married = True
+                    other.spouse = self
+                    self.social_need -= 20
+                    self.happiness += 50
+                    return self.name + " and " + other.name + " got married."
+                else:
+                    self.social_vector[other.id] -= 15
+                    other.social_vector[self.id] -= 15
+                    self.social_need -= 20
+                    self.happiness += 30
+                    return self.name + " and " + other.name + " spent some time together."
+            else:
+                self.social_vector[other.id] += 10
+                self.social_need -= 20
+                self.happiness -= 30
+                return self.name + " was rejected by " + other.name + "."
+        else:
+            self.social_vector[other.id] -= 15
+            other.social_vector[self.id] -= 15
+            self.social_need -= 20
+            self.happiness += 20
+            return self.name + " and " + other.name + " spent some time together."
 
     def argue(self, other = None, **kwargs):
-        luck = int(r.random() * 10 * max(self.attributes.iteritems(), key=operator.itemgetter(1))[1])%100
         if 'enemy' in kwargs:
-            enemy = kwargs['enemy']
-        self.update_happiness(luck)
-        return self.name + " argued."
-
+            other = kwargs['enemy']
+        
+        modifier = ""
+        if self.attributes['int'] > other.attributes['int']:
+            self.happiness += 20
+            other.happiness -= 5
+        else:
+            self.happiness -= 20
+            other.happiness += 5
+        if r.randint(0,1) == 1:
+            modifier = " but they became closer from it"
+            self.social_vector[other.id] -= 30
+            other.social_vector[self.id] -= 30
+        else:
+            self.social_vector[other.id] += 15
+            other.social_vector[self.id] += 15
+        return self.name + " argued with " + other.name + modifier + "."
+ 
     def fight(self, other = None, **kwargs):
+        if other is not None:
+            enemy = other
+        else:
+            enemy = kwargs['enemy']
+
+        if not enemy.is_violent:
+            if self.personality['violent'] > 90:
+                if enemy.attributes['con'] < 16:
+                    #decrease enemy health
+                    #decrease enemy happiness
+                    #incre enemy unaffinity
+                    #increase self happiness
+                    enemy.health -= abs(int(enemy.attributes['con'] - self.attributes['str'] * r.random()))
+                    enemy.happiness -= 60
+                    enemy.social_vector[self.id] += 300
+                    self.happiness += 40
+                    self.social_need -= 40
+                    return self.name + " gave " + enemy.name + " a beating."
+                else:
+                    enemy.happiness -= 20
+                    enemy.social_vector[self.id] += 300
+                    self.happiness -= 10
+                    self.social_need -= 40
+                    return self.name + " tried to give " + enemy.name + " a beating but wasn't strong enough."
+            else:
+                enemy.happiness -= 20
+                enemy.social_vector[self.id] += 100
+                self.happiness -= 1
+                self.social_need -= 40
+                return self.name + " volently confronted " + enemy.name + ", who surrendered."
+        else:
+            if self.attributes['str'] > enemy.attributes['str']:
+                if enemy.attributes['con'] < 16:
+                    #decrease enemy health
+                    #decrease enemy happiness
+                    #incre enemy unaffinity
+                    #increase self happiness
+                    enemy.health -= abs(int(enemy.attributes['con'] - self.attributes['str'] * r.random()))
+                    enemy.happiness -= 20
+                    enemy.social_vector[self.id] += 100
+                    self.happiness += 40
+                    self.social_need -= 40
+                    return self.name + " fought " + enemy.name + " and won."
+                else:
+                    enemy.happiness += 20
+                    enemy.social_vector[self.id] += 300
+                    self.health -= abs(int(self.attributes['con'] - enemy.attributes['str'] * r.random()))
+                    self.happiness -= 10
+                    self.social_need -= 40
+                    return self.name + " fought " + enemy.name + " and lost."
+            else:
+                if self.attributes['con'] < 16:
+                    #decrease enemy health
+                    #decrease enemy happiness
+                    #incre enemy unaffinity
+                    #increase self happiness
+                    self.health -= abs(int(self.attributes['con'] - enemy.attributes['str'] * r.random()))
+                    self.happiness -= 20
+                    self.social_vector[enemy.id] += 100
+                    enemy.happiness += 40
+                    enemy.social_need -= 40
+                    return self.name + " fought " + enemy.name + " and won."
+                else:
+                    self.happiness += 20
+                    self.social_vector[enemy.id] += 300
+                    enemy.health -= abs(int(enemy.attributes['con'] - self.attributes['str'] * r.random()))
+                    enemy.happiness -= 10
+                    enemy.social_need -= 40
+                    return self.name + " fought " + enemy.name + " and lost."                
+
+
         luck = int(r.random() * 10 * max(self.attributes.iteritems(), key=operator.itemgetter(1))[1])%100
+
         self.update_happiness(luck)
         return self.name + " fought."
 
     def steal(self, other = None, **kwargs):
-        luck = int(r.random() * 10 *  max(self.attributes.iteritems(), key=operator.itemgetter(1))[1])%100
-        self.update_happiness(luck)
+        if len(self.location.inhabitants) == 1:
+            return self.play_alone()
+        victim = self.location.inhabitants[r.randint(0, len(self.location.inhabitants)-1)]
+        result = ""
+        while victim == self:
+            victim = self.location.inhabitants[r.randint(0, len(self.location.inhabitants)-1)]
+        success_skills = self.attributes['dex'] + self.attributes['int'] > victim.attributes['int'] + victim.attributes['dex'] and r.randint(0,100) > 40
+        success_strength = self.attributes['str'] > victim.attributes['str'] or self.attributes['str'] > victim.attributes['con'] and r.randint(0,100) > 60
+        if success_skills:
+            self.happiness += 50
+            self.social_need += 20
+            amount = int(victim.resources * r.random())
+            victim.resources -= amount
+            self.resources += amount
+            if r.randint(0,1) == 1:
+                result = ", who found out about it"
+                victim.social_vector[self.id] += 100
+            return self.name + " stole " + str(amount) + " credits from " + victim.name + result + "."
+        elif success_strength:
+            self.happiness += 10
+            self.social_need += 20
+            amount = int(victim.resources * r.random())
+            victim.resources -= amount
+            self.resources += amount
+            victim.social_vector[self.id] += 300
+            victim.happiness -= 30
+            return self.name + " violently stole " + str(amount) + " credits from " + victim.name + result + "."
+        elif not success_strength and not success_skills:
+            #will never succeed
+            return self.fight(victim)
+        else:
+            self.happiness -= 10
+            self.social_need -= 20
+            if r.randint(0,1) == 1:
+                result = " but was found out"
+                victim.social_vector[self.id] += 100
+            return self.name + " tried to steal from " + victim.name + result + "."
+
         return self.name + " stole."
 
-    def cure(self):
+    def cure(self, **kwargs):
         self.sick_atr = False
         self.health += 50
-        return self.name + "saw a doctor and got cured."
+        return self.name + " saw a doctor and got cured."
 
     def suicide(self, **kwargs):
         if 'character_list' in kwargs:
-            kwargs['character_list'].remove(self)
-            for c in kwargs['character_list']:
-                c.fill_social_vector(kwargs['character_list'])
-            return self.name + "committed suicide."
+            return self.name + " committed suicide."
         else:
             return "SOMETHING WENT WRONG"

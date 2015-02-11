@@ -8,13 +8,15 @@
     <meta name="author" content="Pylons Project">
     <link rel="shortcut icon" href="${request.static_url('gamemaster:static/pyramid-16x16.png')}">
 
-    <title>Alchemy Scaffold for The Pyramid Web Framework</title>
+    <title>The Game Master</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="//oss.maxcdn.com/libs/twitter-bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
     <!-- Custom styles for this scaffold -->
     <link href="${request.static_url('gamemaster:static/theme.css')}" rel="stylesheet">
+
+
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -30,49 +32,64 @@
   </head>
 
   <body>
-    ${error}
-    <table style="width: 100%">
-            <tr>
-                    <th>Name</th>
-                    <th>Age</th>
-                    <th>Gender</th>
-                    <th>Location</th>
-                    <th>Profession</th>
-                    <th>Happiness</th>
-                    <th>Resources</th>
-                    <th>Health</th>
-                    <th>Social need</th>
-                    <th>Greedy</th>
-                    <th>Favorite person</th>
-            </tr>
-    % for f in foo:
-            <tr>
-                <td>${f.name}</td>
-                <td>${f.age}</td>
-                <td>${f.gender}</td>
-                <td>${f.location.name}</td>
-                <td>${f.profession}</td>
-                <td>${f.happiness}</td>
-                <td>${f.resources}</td>
-                <td>${f.health}</td>
-                <td>${f.social_need}</td>
-                <td>${f.is_greedy()}</td>
-                <td>${ " sfsdf"}
-            </tr>
-    % endfor 
-    </table>
 
-    <h4>Locations</h4>
-    %for b in bar:
-        ${b.name} - ${b.ocupation}<br/>
-    %endfor
+     <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">The Game Master</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
 
-    <a href="/story"> CONTINUE GENERATING STORY </a>
+    <div class="container">
+
+        <div class="starter-template" style="margin-top:100px">
+            <h1>Character generation</h1>
+                  
+            <div class="row">
+
+            %for character in foo:
+                <% character = foo[character] %>
+              <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                  <img src="${character.picture}" alt="...">
+                  <div class="caption">
+                    <h3>${character.name}</h3>
+                    <p>Profession: ${character.profession.capitalize()}</p>
+                    <p>Location: ${character.location.name}</p>
+                    <p>Resources: ${character.resources} cred.</p>
+                  </div>
+                </div>
+              </div>
+            %endfor
+
+            <a href="/story" class="btn btn-primary" role="button">Continue with story generation</a>
+            </div>
+
+            </div>
+    </div><!-- /.container -->
 <!-- Bootstrap core JavaScript
     ================================================== -->
-
+<footer class="footer">
+      <div class="container">
+        <p class="text-muted">The Game Master</p>
+      </div>
+    </footer>
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="//oss.maxcdn.com/libs/jquery/1.10.2/jquery.min.js"></script>
-    <script src="//oss.maxcdn.com/libs/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
   </body>
 </html>

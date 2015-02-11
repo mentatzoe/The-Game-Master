@@ -50,7 +50,7 @@ try it again.
 def generate(request):
     session = request.session
     locations = l.generate()
-    characters = []
+    characters = {}
     char_num = int(request.matchdict['number_of_characters'])
     #we generate all characters first
     for char_ind in range(char_num):
@@ -67,13 +67,14 @@ def generate(request):
             c.set_location(loc)
             loc.inhabitants.append(c)
             loc.increase_ocupation()
-        characters.append(c)
+        characters[c.id] = c
     
     #then we calculate their relationships
     for char in characters:
-        char.fill_social_vector(characters)
-        log.info(char.social_vector)
-        char.update_booleans(characters)
+        log.info(characters[char])
+        characters[char].fill_social_vector(characters)
+        log.info(characters[char].social_vector)
+        characters[char].update_booleans(characters)
         #Calculate can_work, doctor_available, friend/enemy_in_location
     #session['chars'] = characters
     model = MyModel()
@@ -88,6 +89,7 @@ def generate_story(request):
     session = request.session
     log.info(session)
     happenings = []
+    dead_characters = []
     error_msg = ''
     characters_pre = DBSession.query(MyModel).filter(MyModel.name == session['chars']).one()
     characters = pickle.loads(characters_pre.value)
@@ -98,23 +100,30 @@ def generate_story(request):
             for char in characters:
                 acted = False
                 for rule in rules:
-                    if rule.matches(char):
-                        if char.sick():
-                            log.info(str(i) + season + char.name + " Character is sick")
-                        happenings.append(season + " of Year " + str(i) + ": " + rule.do_action(char, characters) + " " + str(char.happiness))
-                        char.update_booleans(characters)
-                        char.update_health()
+                    if rule.matches(characters[char]):  
+                        happened = {'year':3456+i, 'season': season, 'character': characters[char], 'character_img': characters[char].picture, 'name': characters[char].name, 'location': characters[char].location.name, 'action_narrated': rule.do_action(characters[char], characters)}
+                        happenings.append(happened)
+                        characters[char].update_booleans(characters)
+                        characters[char].update_health()
+                        if rule.action in ['die', 'suicide']:
+                            if characters[char] not in dead_characters:
+                                dead_characters.append(characters[char])
                         acted = True
-                        log.info("RULE TRIGGERED " + str(rule))
                         break
                 if not acted:
-                    log.info(char.name + "DIDNT ACT -----")
-                    log.info("# rules " + str(len(rules)))
-                    log.info(rules[23].matches(char))
-                    char.log_booleans()
-                    char.update_booleans(characters)
-                    char.update_health()
-                    log.info("_______________________________")
-            happenings.append("________________________________")
-        happenings.append("________________________________")
-    return {'foo' : ['a', 'b'], 'bar': happenings, 'error' : error_msg }
+                    characters[char].update_booleans(characters)
+                    characters[char].update_health()
+            #updating deaths
+
+            for char in dead_characters:
+                char.location.inhabitants.remove(char)
+                char.location.ocupation -= 1
+                del characters[char.id]
+                for c in characters:
+                    characters[c].fill_social_vector(characters)
+            dead_characters = []
+            log.info("__________________END OF SEASON______________")
+        log.info("_______________END OF YEAR_________________")
+        for c in characters:
+            characters[c].age +=1
+    return {'happenings': happenings, 'characters': characters, 'error' : error_msg }
