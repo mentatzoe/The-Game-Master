@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
     <!-- Custom styles for this scaffold -->
     <link href="${request.static_url('gamemaster:static/theme.css')}" rel="stylesheet">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 
 
 
@@ -58,34 +57,13 @@
     <div class="container">
 
         <div class="starter-template" style="margin-top:100px">
-            <h1>Story development</h1>
-            <br/>
-            <br/>
+            <h1>Welcome!</h1>
+                  
             <div class="row">
-                %for h in happenings:
-                <div class="col-sm-6 col-md-4">
-                        <div class="thumbnail" style="width:30%">
-                          <img src="${h['character_img']}" alt="...">
-                        </div>
-                    </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading"><b>${h['name']} - ${h['location']}</b>
-                    %if h['character'].married:
-                        <b class="pull-right">Spouse: ${h['character'].spouse.name}</b>
-                    %endif
-                    </div>
-                    <div class="panel-body">
-                    
-                    <div class="col-md-8">
-                        <h4>Year ${h['year']} - ${h['season']}</h4>
-                        <p>${h['action_narrated']}</p>
-                    </div>
-                    </div>
-                </div>
-                %endfor
 
-            
-        </div>
+            Here you'll find a form to do things and stuff.
+
+            </div>
     </div><!-- /.container -->
 <!-- Bootstrap core JavaScript
     ================================================== -->
