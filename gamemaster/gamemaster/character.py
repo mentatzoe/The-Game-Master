@@ -43,6 +43,10 @@ class Character:
         self.can_work_atr = True
         self.friend_in_location_atr = False
         self.enemy_in_location_atr = False
+        if self.gender == 'male':
+            self.pronoun = 'He'
+        else:
+            self.pronoun = 'She'
         self.generate_picture()
 
     def sick(self):
@@ -234,7 +238,7 @@ class Character:
         self.resources += int(math.floor(g.profession_pays[self.profession] * (luck)))
         self.update_happiness(luck)
         self.social_need += 20
-        return self.name + " worked."
+        return self.pronoun + " worked."
 
     def travel(self, free = False, **kwargs):
         new_location = None
@@ -256,12 +260,16 @@ class Character:
                 if self.location.connections[id_num] is not 0 and self.location.connections[id_num].can_work(self):
                     new_location = self.location.connections[id_num]
             if new_location is None:
-                return self.name + " wanted to travel but couldn't."
+                return self.pronoun + " wanted to travel but couldn't."
 
         self.location.ocupation -= 1
         new_location.increase_ocupation()
         if 'free' not in kwargs or kwargs['free'] == False:
-            price = self.location.connections[new_location.id].price
+            log.info(self.location)
+            try:
+                price = self.location.connections[new_location.id].price
+            except:
+                price = 3000
             self.resources -= price
         old_location = self.location
         self.location.inhabitants.remove(self)
@@ -274,10 +282,10 @@ class Character:
         for c in kwargs['character_list']:
             kwargs['character_list'][c].update_booleans(kwargs['character_list'])
 
-        return self.name + " went to " + self.location.name + reason + "."
+        return self.pronoun + " went to " + self.location.name + reason + "."
 
     def die(self, **kwargs):
-        return self.name + " died."
+        return self.pronoun + " died."
 
     def play(self, other = None, **kwargs):
         if len(self.location.inhabitants) == 1:
@@ -306,7 +314,7 @@ class Character:
                 pass
             else:
                 playerList += player.name + ", "
-        return self.name + " played " + game[0] + " with " + playerList + " and " + won
+        return self.pronoun + " played " + game[0] + " with " + playerList + " and " + won
 
 
     def play_alone(self, other = None, **kwargs):
@@ -315,7 +323,7 @@ class Character:
         previous = self.social_need
         self.social_need += int(10 + previous * 0.1)
         self.happiness += 10
-        return self.name + " " + game[0] + "."
+        return self.pronoun + " " + game[0] + "."
 
     def love(self, other = None, **kwargs):
         other = kwargs['friend']
@@ -331,24 +339,24 @@ class Character:
                     other.spouse = self
                     self.social_need -= 20
                     self.happiness += 50
-                    return self.name + " and " + other.name + " got married."
+                    return self.pronoun + " and " + other.name + " got married."
                 else:
                     self.social_vector[other.id] -= 15
                     other.social_vector[self.id] -= 15
                     self.social_need -= 20
                     self.happiness += 30
-                    return self.name + " and " + other.name + " spent some time together."
+                    return self.pronoun + " and " + other.name + " spent some time together."
             else:
                 self.social_vector[other.id] += 10
                 self.social_need -= 20
                 self.happiness -= 30
-                return self.name + " was rejected by " + other.name + "."
+                return self.pronoun + " was rejected by " + other.name + "."
         else:
             self.social_vector[other.id] -= 15
             other.social_vector[self.id] -= 15
             self.social_need -= 20
             self.happiness += 20
-            return self.name + " and " + other.name + " spent some time together."
+            return self.pronoun + " and " + other.name + " spent some time together."
 
     def argue(self, other = None, **kwargs):
         if 'enemy' in kwargs:
@@ -368,7 +376,7 @@ class Character:
         else:
             self.social_vector[other.id] += 15
             other.social_vector[self.id] += 15
-        return self.name + " argued with " + other.name + modifier + "."
+        return self.pronoun + " argued with " + other.name + modifier + "."
  
     def fight(self, other = None, **kwargs):
         if other is not None:
@@ -388,19 +396,19 @@ class Character:
                     enemy.social_vector[self.id] += 300
                     self.happiness += 40
                     self.social_need -= 40
-                    return self.name + " gave " + enemy.name + " a beating."
+                    return self.pronoun + " gave " + enemy.name + " a beating."
                 else:
                     enemy.happiness -= 20
                     enemy.social_vector[self.id] += 300
                     self.happiness -= 10
                     self.social_need -= 40
-                    return self.name + " tried to give " + enemy.name + " a beating but wasn't strong enough."
+                    return self.pronoun + " tried to give " + enemy.name + " a beating but wasn't strong enough."
             else:
                 enemy.happiness -= 20
                 enemy.social_vector[self.id] += 100
                 self.happiness -= 1
                 self.social_need -= 40
-                return self.name + " volently confronted " + enemy.name + ", who surrendered."
+                return self.pronoun + " volently confronted " + enemy.name + ", who surrendered."
         else:
             if self.attributes['str'] > enemy.attributes['str']:
                 if enemy.attributes['con'] < 16:
@@ -413,14 +421,14 @@ class Character:
                     enemy.social_vector[self.id] += 100
                     self.happiness += 40
                     self.social_need -= 40
-                    return self.name + " fought " + enemy.name + " and won."
+                    return self.pronoun + " fought " + enemy.name + " and won."
                 else:
                     enemy.happiness += 20
                     enemy.social_vector[self.id] += 300
                     self.health -= abs(int(self.attributes['con'] - enemy.attributes['str'] * r.random()))
                     self.happiness -= 10
                     self.social_need -= 40
-                    return self.name + " fought " + enemy.name + " and lost."
+                    return self.pronoun + " fought " + enemy.name + " and lost."
             else:
                 if self.attributes['con'] < 16:
                     #decrease enemy health
@@ -432,20 +440,20 @@ class Character:
                     self.social_vector[enemy.id] += 100
                     enemy.happiness += 40
                     enemy.social_need -= 40
-                    return self.name + " fought " + enemy.name + " and won."
+                    return self.pronoun + " fought " + enemy.name + " and won."
                 else:
                     self.happiness += 20
                     self.social_vector[enemy.id] += 300
                     enemy.health -= abs(int(enemy.attributes['con'] - self.attributes['str'] * r.random()))
                     enemy.happiness -= 10
                     enemy.social_need -= 40
-                    return self.name + " fought " + enemy.name + " and lost."                
+                    return self.pronoun + " fought " + enemy.name + " and lost."                
 
 
         luck = int(r.random() * 10 * max(self.attributes.iteritems(), key=operator.itemgetter(1))[1])%100
 
         self.update_happiness(luck)
-        return self.name + " fought."
+        return self.pronoun + " fought."
 
     def steal(self, other = None, **kwargs):
         if len(self.location.inhabitants) == 1:
@@ -465,7 +473,7 @@ class Character:
             if r.randint(0,1) == 1:
                 result = ", who found out about it"
                 victim.social_vector[self.id] += 100
-            return self.name + " stole " + str(amount) + " credits from " + victim.name + result + "."
+            return self.pronoun + " stole " + str(amount) + " credits from " + victim.name + result + "."
         elif success_strength:
             self.happiness += 10
             self.social_need += 20
@@ -474,7 +482,7 @@ class Character:
             self.resources += amount
             victim.social_vector[self.id] += 300
             victim.happiness -= 30
-            return self.name + " violently stole " + str(amount) + " credits from " + victim.name + result + "."
+            return self.pronoun + " violently stole " + str(amount) + " credits from " + victim.name + result + "."
         elif not success_strength and not success_skills:
             #will never succeed
             return self.fight(victim)
@@ -484,17 +492,17 @@ class Character:
             if r.randint(0,1) == 1:
                 result = " but was found out"
                 victim.social_vector[self.id] += 100
-            return self.name + " tried to steal from " + victim.name + result + "."
+            return self.pronoun + " tried to steal from " + victim.name + result + "."
 
-        return self.name + " stole."
+        return self.pronoun + " stole."
 
     def cure(self, **kwargs):
         self.sick_atr = False
         self.health += 50
-        return self.name + " saw a doctor and got cured."
+        return self.pronoun + " saw a doctor and got cured."
 
     def suicide(self, **kwargs):
         if 'character_list' in kwargs:
-            return self.name + " committed suicide."
+            return self.pronoun + " committed suicide."
         else:
             return "SOMETHING WENT WRONG"

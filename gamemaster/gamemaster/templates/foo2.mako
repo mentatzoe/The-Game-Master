@@ -34,7 +34,7 @@
 
   <body>
 
-     <nav class="navbar navbar-inverse navbar-fixed-top">
+     <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -43,11 +43,11 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">The Game Master</a>
+          <a class="navbar-brand" href="/">The Game Master</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
+            <li class="active"><a href="/">Home</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
           </ul>
@@ -62,34 +62,90 @@
             <br/>
             <br/>
             <div class="row">
-                %for h in happenings:
-                <div class="col-sm-6 col-md-4">
-                        <div class="thumbnail" style="width:30%">
-                          <img src="${h['character_img']}" alt="...">
+                %for year in happenings:
+                <%
+                    bgcolor = {
+                        'Spring': 'mistyrose',
+                        'Winter': 'aliceblue',
+                        'Summer': 'ivory',
+                        'Fall': 'tan'
+                    }
+
+                    action_icons = {
+                        'work': 'briefcase',
+                        'travel': 'plane',
+                        'travel_friend': 'plane',
+                        'travel_enemy': 'plane',
+                        'travel_free': 'plane',
+                        'travel_friend_free': 'plane',
+                        'travel_enemy_free': 'plane',
+                        'play': 'gamepad',
+                        'play_alone': 'user',
+                        'love': 'heart',
+                        'steal': 'money',
+                        'fight': 'bomb',
+                        'argue': 'exclamation',
+                        'die': 'plus',
+                        'cure': 'medkit',
+                        'suicide': 'plus'
+                    }
+
+                    location_images = {
+                        'Sydney Archology' : '/static/images/city.jpg',
+                        'Luthien Prime Colony' : '/static/images/colony.jpg',
+                        'Horizon RK7' : '/static/images/spaceship.jpg'
+                    } 
+                %>
+                    %for season in year['seasons']:
+                    <h3>${season['name']} of year ${year['number']}</h3>
+                        %for h in season['happenings']:
+                        <div class="col-sm-6 col-md-4">
+                                <div class="thumbnail" style="width:30%">
+                                  <img src="${h['character_img']}" alt="...">
+                                </div>
+                            </div>
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><b>${h['name']} - ${h['location']}</b>
+                            %if h['character'].married:
+                                <b class=""> - Spouse: ${h['character'].spouse.name} </b>
+                            %endif
+
+                            <div class="pull-right">
+                                    %if int(h['happiness']) >50:
+                                         <i class="fa fa-smile-o fa-2x"></i>
+                                    %else:
+                                         <i class="fa fa-frown-o fa-2x"></i>
+                                    %endif
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                            
+                            
+                            <div class="col-md-6">
+                                <p>${h['action_narrated']}</p>
+                                <i class="fa fa-${action_icons[h['action']]} fa-2x"></i>
+                            </div>
+                            
+                            <div class="col-md-2">
+                            
+                            <a href="#" class="thumbnail pull-right">
+                              <img src="${location_images[h['location']]}" width="100px" alt="${h['location']}">
+                            </a>
+
+                            </div>
+                            </div>
                         </div>
-                    </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading"><b>${h['name']} - ${h['location']}</b>
-                    %if h['character'].married:
-                        <b class="pull-right">Spouse: ${h['character'].spouse.name}</b>
-                    %endif
-                    </div>
-                    <div class="panel-body">
-                    
-                    <div class="col-md-8">
-                        <h4>Year ${h['year']} - ${h['season']}</h4>
-                        <p>${h['action_narrated']}</p>
-                    </div>
-                    </div>
-                </div>
+                        %endfor
+                    %endfor
                 %endfor
 
             
         </div>
-    </div><!-- /.container -->
+        </div><!-- /.container -->
+    </div>
 <!-- Bootstrap core JavaScript
     ================================================== -->
-<footer class="footer">
+<footer>
       <div class="container">
         <p class="text-muted">The Game Master</p>
       </div>

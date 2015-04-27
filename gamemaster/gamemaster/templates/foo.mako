@@ -33,7 +33,7 @@
 
   <body>
 
-     <nav class="navbar navbar-inverse navbar-fixed-top">
+     <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -42,7 +42,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">The Game Master</a>
+          <a class="navbar-brand" href="/">The Game Master</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -55,6 +55,7 @@
     </nav>
 
     <div class="container">
+        <iframe src='https://civinomics.com/widget/510b/n---shall-lompico-water-be-authorized-to-issue-bonds-in-the-maximum-amount-of-32m-to-construct-water-system-improvements/400' width='100%' height='250px' overflow='no'></iframe>
 
         <div class="starter-template" style="margin-top:100px">
             <h1>Character generation</h1>
@@ -81,9 +82,10 @@
 
             </div>
     </div><!-- /.container -->
+
 <!-- Bootstrap core JavaScript
     ================================================== -->
-<footer class="footer">
+<footer>
       <div class="container">
         <p class="text-muted">The Game Master</p>
       </div>

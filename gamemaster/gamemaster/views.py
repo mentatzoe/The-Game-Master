@@ -20,7 +20,7 @@ import pickle
 log = logging.getLogger(__name__)
 
 
-@view_config(route_name='home', renderer='templates/mytemplate.pt')
+@view_config(route_name='home', renderer='templates/base.mako')
 def my_view(request):
     try:
         one = DBSession.query(MyModel).filter(MyModel.name == 'one').first()
@@ -51,7 +51,15 @@ def generate(request):
     session = request.session
     locations = l.generate()
     characters = {}
-    char_num = int(request.matchdict['number_of_characters'])
+    if 'num_characters' in request.matchdict:
+        char_num = int(request.matchdict['num_characters'])
+    elif 'num_characters' in request.GET:
+        char_num = int(request.GET['num_characters'])
+    else:
+        log.info('OOPS')    
+        
+    
+
     #we generate all characters first
     for char_ind in range(char_num):
         c = Character()
@@ -82,6 +90,8 @@ def generate(request):
     model.value = str(pickle.dumps(characters))
     db_characters = DBSession.add(model)
     session['chars'] = model.name
+    if 'num_years' in request.GET:
+        session['years'] = request.GET['num_years']
     return {'foo' : characters, 'bar': locations, 'error' : error_msg }
 
 @view_config(route_name='generate_story', renderer='templates/foo2.mako')
@@ -95,14 +105,25 @@ def generate_story(request):
     characters = pickle.loads(characters_pre.value)
     rules = ru.render_rules()
     acted = False
-    for i in range(5):
+    if 'years' in session:
+        num_years = int(session['years'])
+    else:
+        num_years = 4
+    for i in range(num_years):
+        year = {'number' : 3456+i, 'seasons': []}
         for season in ['Summer', 'Fall', 'Winter', 'Spring']:
+            season_name = {'name': season, 'happenings':[]}
+            year['seasons'].append(season_name)
             for char in characters:
                 acted = False
                 for rule in rules:
-                    if rule.matches(characters[char]):  
-                        happened = {'year':3456+i, 'season': season, 'character': characters[char], 'character_img': characters[char].picture, 'name': characters[char].name, 'location': characters[char].location.name, 'action_narrated': rule.do_action(characters[char], characters)}
-                        happenings.append(happened)
+                    if rule.matches(characters[char]):
+                        happened = {'year':3456+i, 'season': season, 'character': characters[char], 
+                        'character_img': characters[char].picture, 'name': characters[char].name, 
+                        'location': characters[char].location.name, 'action_narrated': rule.do_action(characters[char], characters),
+                        'action' : rule.action, 'happiness': characters[char].happiness
+                        }
+                        season_name['happenings'].append(happened)
                         characters[char].update_booleans(characters)
                         characters[char].update_health()
                         if rule.action in ['die', 'suicide']:
@@ -126,4 +147,5 @@ def generate_story(request):
         log.info("_______________END OF YEAR_________________")
         for c in characters:
             characters[c].age +=1
+        happenings.append(year)
     return {'happenings': happenings, 'characters': characters, 'error' : error_msg }

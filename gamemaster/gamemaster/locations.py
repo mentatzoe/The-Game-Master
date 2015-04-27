@@ -44,7 +44,7 @@ class Location:
 def generate():
     location_list = []
     spaceship = Location(0, 'Horizon RK7', ['military', 'doctor', 'builder'], [('tennis', 'dex', 2), ('virtual sports', 'dex', 3), ('chess', 'dex', 2)], [('researched', 'int'), ('studied', 'dex'), ('worked out', 'str')], 5, 3000)
-    city = Location(1, 'Sydney Archology', ['police', 'scholar', 'doctor', 'artist', 'salesman', 'politician'], [('chess', 'int', 2), ('virtual sports', 'dex', 7), ('study', 'int', 1)], [('researched', 'int'), ('studied', 'dex'), ('worked out', 'str')], 12, 2000)
+    city = Location(1, 'Sydney Archology', ['police', 'scholar', 'doctor', 'artist', 'salesman', 'politician'], [('chess', 'int', 2), ('virtual sports', 'dex', 7)], [('researched', 'int'), ('studied', 'dex'), ('worked out', 'str')], 12, 2000)
     colony = Location(2, 'Luthien Prime Colony', ['military', 'police', 'doctor', 'builder', 'salesman', 'politician'], [('chess', 'int', 2), ('virtual sports', 'dex', 5)], [('researched', 'int'), ('studied', 'dex'), ('worked out', 'str')], 7, 3500) 
     
     spaceship.set_connections({spaceship.id: 0, city.id: city, colony.id: colony})
